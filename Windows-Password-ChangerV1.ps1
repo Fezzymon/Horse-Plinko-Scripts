@@ -1,12 +1,9 @@
-﻿# --- 1. DEFINE OR GENERATE YOUR PASSWORDS ---
-# This is where your randomization logic would go.
-# For now, we'll use the passwords from your example.
+﻿#Define Passwords
 $adminPassword = "34SYL0GG0N"
 $userPassword  = 'th3N$4'
 
 
-# --- 2. CHANGE THE PASSWORDS ON THE SYSTEM ---
-# Convert passwords to the required SecureString format
+#Change System Passwords
 $secureAdminPassword = ConvertTo-SecureString $adminPassword -AsPlainText -Force
 $secureUserPassword  = ConvertTo-SecureString $userPassword -AsPlainText -Force
 
@@ -30,8 +27,7 @@ Get-LocalUser | Where-Object { $_.Name -ne "Administrator" -and $_.Name -ne "Gue
 }
 
 
-# --- 3. SECURELY DISPLAY THE PASSWORDS THAT WERE SET ---
-# Create objects to hold the plain-text passwords for display
+#Use a GUI to display new passwords securely, allows for randomized passwords
 $displayData = @(
     [PSCustomObject]@{
         Account     = "Administrator"
@@ -46,5 +42,6 @@ $displayData = @(
 # Display the data in a separate GUI window that is less likely to be logged
 Write-Host "Displaying passwords in a pop-up window..."
 $displayData | Out-GridView -Title "System Passwords Set"
+
 
 Write-Host "Script finished."
