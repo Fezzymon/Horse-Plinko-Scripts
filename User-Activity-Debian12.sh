@@ -7,14 +7,14 @@ install_packages() {
     sudo apt install -y auditd
 }
 
-# Function to start and enable auditd service
+#start and enable auditd service
 setup_auditd() {
     echo "Starting and enabling auditd service..."
     sudo systemctl start auditd
     sudo systemctl enable auditd
 }
 
-#check if auditd is running
+#check auditd is running
 is_auditd_running() {
     systemctl is-active --quiet auditd
 }
@@ -28,13 +28,13 @@ add_audit_rule() {
 
 # Main
 
-#Install required packages
+#install required packages
 install_packages
 
 #Set up auditd service
 setup_auditd
 
-#Verify auditd is running
+#check auditd is running
 if ! is_auditd_running; then
     echo "Failed to start auditd service. Aborting."
     exit 1
@@ -57,3 +57,4 @@ sudo cat /var/log/auth.log | grep "sudo" | grep "$username"
 add_audit_rule "$username"
 echo "Audit rule added to monitor changes to /home/$username."
 echo "Use 'ausearch -k user_home' to check for changes."
+
