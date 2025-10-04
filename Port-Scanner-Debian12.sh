@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Install netcat if not already installed
+#make sure netcar is installed
 if ! command -v nc &> /dev/null; then
     echo "Netcat not found. Installing..."
     sudo apt update
@@ -11,6 +11,7 @@ if ! command -v nc &> /dev/null; then
     fi
 fi
 
-# Scan local machine for open ports (1–1023)
+#check for open ports (1–1023)
 echo "=== Scanning local machine for open ports (1–1023) ==="
 nc -zv localhost 1-1023 2>&1 | grep succeeded
+
