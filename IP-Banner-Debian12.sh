@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Prompt user for IP address
+#prompt for IP address
 read -p "Enter the IP address to block: " IP
 
-# Validate IP format
+#check IP format
 if [[ $IP =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     echo "Valid IP address: $IP"
 else
@@ -11,14 +11,14 @@ else
     exit 1
 fi
 
-# Check if nftables is installed, install if not
+#check nftables install status
 if ! command -v nft &> /dev/null; then
     echo "nftables not found. Installing..."
     sudo apt update
     sudo apt install -y nftables
 fi
 
-# Add nftables rule to block the IP
+#add nftables ip ban
 sudo nft -f <<EOF
 table ip filter {
     chain input {
@@ -29,7 +29,7 @@ table ip filter {
 }
 EOF
 
-# Confirm the rule was added
+#tell user rule was added
 echo "Blocked IP: $IP from accessing any ports on this system."
 echo "To unblock, run: sudo nft -f <<EOF
 table ip filter {
@@ -40,3 +40,4 @@ table ip filter {
     }
 }
 EOF
+
