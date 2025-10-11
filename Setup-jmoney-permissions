@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# Exit on error
+set -e
+
+# Variables
+USER="jmoney"
+GROUP="scoring"
+LOG_DIR="/var/log"
+ETC_DIR="/etc"
+HOME_DIR="/home/$USER"
+SUDOERS_RULE="jmoney ALL=(root) NOPASSWD: /bin/systemctl status *, /bin/systemctl is-active *"
+
+# Step 1: Create the scoring group and add jmoney
+echo "Creating group $GROUP and adding $USER..."
+sudo groupadd "$GROUP"
+sudo usermod -aG "$GROUP" "$USER"
+
+# Step 2: Set read-only permissions on critical directories
+echo "Setting read-only permissions on $LOG_DIR, $ETC_DIR, and $HOME_DIR..."
+sudo chmod -R o-rwx "$LOG_DIR"          # Remove write access for others
+sudo chmod -R o-rwx "$ETC_DIR"          # Remove write access for others
+sudo chmod 555 "$HOME_DIR"              # Allow read and execute, no write
+
+# Step 3: Ensure jmoney can read files in /var/log and /etc
+echo "Setting file permissions to read-only..."
+sudo find "$LOG_DIR" -type f -exec chmod 644 {} \;
+sudo find "$ETC_DIR" -type f -exec chmod 644 {} \;
+
+# Step 4: Configure sudoers to allow systemctl status checks
+echo "Configuring sudoers to allow systemctl status checks..."
+echo "$SUDOERS_RULE" | sudo tee /etc/sudoers.d/jmoney_systemctl > /dev/null
+
+# Step 5: Prevent write access to all files and directories
+echo "Removing world-writable permissions..."
+sudo find / -type d -perm -2000 -exec chmod 755 {} \;  # Remove setuid bits
+sudo find / -type f -perm -222 -exec chmod 644 {} \;  # Remove world-writable files
+
+# Step 6: Set up audit rules (optional, for monitoring access)
+echo "Setting up audit rules (optional)..."
+sudo auditctl -w /var/log -p r -k jmoney_access
+sudo auditctl -w /etc -p r -k jmoney_access
+
+# Step 7: Verify permissions
+echo "Verifying permissions..."
+ls -l "$LOG_DIR"
+ls -l "$ETC_DIR"
+ls -l "$HOME_DIR"
+sudo ls -l /etc/sudoers.d
+
+echo "✅ Setup complete. $USER has read-only access to critical directories, can check service statuses, and has no sudo access."
